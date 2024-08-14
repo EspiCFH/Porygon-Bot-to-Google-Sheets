@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-import csv
+import csv, json
 
 path = os.getcwd()
 
@@ -13,8 +13,20 @@ f_file = open(r'%s\format.txt' % path)
 for line in f_file:
     fmlist.append(line)
 fmlist.pop(0)
+print(fmlist)
 f_file.close()
-#print(fmlist)
+# config
+with open('config.json') as confile:
+            confjson = json.load(confile)
+            PADLmode = confjson['PADL Mode']
+            replaymode = confjson['Replays']
+
+# dictionary
+dictionary = open('PADLDictionary.json','r+')
+dictionary_json = json.load(dictionary)
+dictionary.close()
+def convert_PADL(mon):
+    return dictionary_json[mon.lower()]
 
 # Get Porybot Data
 print('Please paste the entire porybot message here')
@@ -37,26 +49,32 @@ for player in players:
     pattern = r'(?<='+player+r':[\s\n]\n)[\s\S]+?(?=[\s\n]+?.+:)'
     # Parse Porybot Data
     statlist = []
-    def getStats():
-        global statlist, replay
-        mondata = re.findall(pattern, pory_raw)[0].split('\n')
-        #print(mondata)
-        replay = re.findall(r'(?<=Replay:\s).+',pory_raw)[0]
-        for ele in mondata:
-            index = mondata.index(ele)+1
-            mon = re.findall(r'^.+(?=\shas)',ele)[0]
-            kill_list = re.findall(r'\d(?=.+kills)',ele)
-            kills = str(int(kill_list[0])+int(kill_list[1]))
-            deaths = re.findall(r'\d(?=\sdeaths)',ele)[0]
-            statlist.append((mon,kills,deaths))
+    
+    mondata = re.findall(pattern, pory_raw)[0].split('\n')
+    replay = re.findall(r'(?<=Replay:\s).+',pory_raw)[0]
+    for ele in mondata:
+        index = mondata.index(ele)+1
+        mon = re.findall(r'^.+(?=\shas)',ele)[0]
+        if PADLmode == 'on':
+            mon = convert_PADL(mon)
+        else:
+            pass
+        
+        kill_list = re.findall(r'\d(?=.+kills)',ele)
+        kills = str(int(kill_list[0])+int(kill_list[1]))
+        deaths = re.findall(r'\d(?=\sdeaths)',ele)[0]
+        statlist.append((mon,kills,deaths))
 
-    getStats()
     #output Porybot Data
     curr = 0
     with open('Output.txt','a',newline='') as outfile:
         for line in fmlist:
             if 'Replay' in line:
-                break
+                if replaymode != 'on':
+                    break
+                else:
+                    outfile.write(line.replace('RP',replay))
+                    break
             outline = line.replace(f'Mon{curr+1}',statlist[curr][0]).replace(f'K{curr+1}',statlist[curr][1]).replace(f'D{curr+1}',statlist[curr][2]).replace('\n','')
             #print(repr(outline))
             outfile.write(outline+'\n')
