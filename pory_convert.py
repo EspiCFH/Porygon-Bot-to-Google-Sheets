@@ -13,7 +13,6 @@ f_file = open(r'%s\format.txt' % path)
 for line in f_file:
     fmlist.append(line)
 fmlist.pop(0)
-print(fmlist)
 f_file.close()
 # config
 with open('config.json') as confile:
@@ -22,7 +21,7 @@ with open('config.json') as confile:
             replaymode = confjson['Replays']
 
 # dictionary
-dictionary = open('PADLDictionary.json','r+')
+dictionary = open('_PADLDictionary.json','r+')
 dictionary_json = json.load(dictionary)
 dictionary.close()
 def convert_PADL(mon):
