@@ -25,7 +25,7 @@ dictionary = open('_PADLDictionary.json','r+')
 dictionary_json = json.load(dictionary)
 dictionary.close()
 def convert_PADL(mon):
-    return dictionary_json[mon.lower()]
+    return dictionary_json[mon.lower().replace(' ','-')]
 
 # Get Porybot Data
 print('Please paste the entire porybot message here')
